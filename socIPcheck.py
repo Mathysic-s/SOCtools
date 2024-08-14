@@ -62,11 +62,11 @@ def shodanScan(target, api_key):
         print("\n[+] Shodan scan:\n")
         print(f"\t. Organization: {results.get('org', 'N/A')}")
         domains = results.get('domains', [])
-        print(f"\t. Domains: {', '.join(map(str,domains)) if domains else 'Domains: N/A'}")
+        print(f"\t. Domains: {', '.join(map(str,domains)) if domains else 'N/A'}")
         ports = results.get('ports', [])
-        print(f"\t. Ports: {', '.join(map(str,ports)) if ports else 'Ports: N/A'}")
+        print(f"\t. Ports: {', '.join(map(str,ports)) if ports else 'N/A'}")
         vulnerabilities = results.get('vulns', [])
-        print(f"\t. Vulnerabilities: {', '.join(map(str,vulnerabilities)) if vulnerabilities else 'Vulnerabilities: N/A'}")
+        print(f"\t. Vulnerabilities: {', '.join(map(str,vulnerabilities)) if vulnerabilities else 'N/A'}")
         print(f'\t. Source https://www.shodan.io/host/{target}\n')
         return 1
     except shodan.APIError as e:
@@ -76,9 +76,9 @@ def shodanFreeScan(target):
     print("\n[+] Shodan scan:\n")
     try:
         results = requests.get(f"https://internetdb.shodan.io/{target}").json()
-        print(f"\t. Hostnames: {', '.join(map(str, results['hostnames'])) if results['hostnames'] else 'Hostnames: N/A'}")
-        print(f"\t. Ports: {', '.join(map(str,results['ports'])) if results['ports'] else 'Ports: N/A'}")
-        print(f"\t. Vulnerabilities: {', '.join(map(str, results['vulns'])) if results['vulns'] else 'Vulnerabilities: N/A'}")
+        print(f"\t. Domains: {', '.join(map(str, results['hostnames'])) if 'hostnames' in results else 'N/A'}")
+        print(f"\t. Ports: {', '.join(map(str,results['ports'])) if 'ports' in results else 'N/A'}")
+        print(f"\t. Vulnerabilities: {', '.join(map(str, results['vulns'])) if 'vulns' in results else 'N/A'}")
         print(f'\t. Source https://www.shodan.io/host/{target}\n')
         return 1
     except Exception as e:
