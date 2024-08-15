@@ -26,7 +26,7 @@ def abuseIPDB(ip, api_key):
         else:
             print(f'\t. No abusive activity found for {ip}. See https://www.abuseipdb.com/check/{ip}')
     else:
-        print(f"\tFailed to fetch data. Status Code: {response.status_code}")
+        print(f"\t[-] Failed to fetch data. Status Code: {response.status_code}")
 
 def vtScan(ip,inpt, api):
     if inpt:
@@ -53,7 +53,7 @@ def vtScan(ip,inpt, api):
         else:
             print(f'\t. {malicious}/{total} security vendors flagged {ip}. See https://www.virustotal.com/gui/domain/{ip}')
     else:
-         print(f"Failed to fetch data. Status Code: {response.status_code}")
+         print(f"[-] Failed to fetch data. Status Code: {response.status_code}")
 
 def shodanScan(target, api_key):
     api = shodan.Shodan(api_key)
@@ -62,11 +62,11 @@ def shodanScan(target, api_key):
         print("\n[+] Shodan scan:\n")
         print(f"\t. Organization: {results.get('org', 'N/A')}")
         domains = results.get('domains', [])
-        print(f"\t. Domains: {', '.join(map(str,domains)) if domains else 'Domains: N/A'}")
+        print(f"\t. Domains: {', '.join(map(str,domains)) if domains else 'N/A'}")
         ports = results.get('ports', [])
-        print(f"\t. Ports: {', '.join(map(str,ports)) if ports else 'Ports: N/A'}")
+        print(f"\t. Ports: {', '.join(map(str,ports)) if ports else 'N/A'}")
         vulnerabilities = results.get('vulns', [])
-        print(f"\t. Vulnerabilities: {', '.join(map(str,vulnerabilities)) if vulnerabilities else 'Vulnerabilities: N/A'}")
+        print(f"\t. Vulnerabilities: {', '.join(map(str,vulnerabilities)) if vulnerabilities else 'N/A'}")
         print(f'\t. Source https://www.shodan.io/host/{target}\n')
         return 1
     except shodan.APIError as e:
@@ -76,13 +76,13 @@ def shodanFreeScan(target):
     print("\n[+] Shodan scan:\n")
     try:
         results = requests.get(f"https://internetdb.shodan.io/{target}").json()
-        print(f"\t. Hostnames: {', '.join(map(str, results['hostnames'])) if results['hostnames'] else 'Hostnames: N/A'}")
-        print(f"\t. Ports: {', '.join(map(str,results['ports'])) if results['ports'] else 'Ports: N/A'}")
-        print(f"\t. Vulnerabilities: {', '.join(map(str, results['vulns'])) if results['vulns'] else 'Vulnerabilities: N/A'}")
+        print(f"\t. Domains: {', '.join(map(str, results['hostnames'])) if 'hostnames' in results else 'N/A'}")
+        print(f"\t. Ports: {', '.join(map(str,results['ports'])) if 'ports' in results else 'N/A'}")
+        print(f"\t. Vulnerabilities: {', '.join(map(str, results['vulns'])) if 'vulns' in results else 'N/A'}")
         print(f'\t. Source https://www.shodan.io/host/{target}\n')
         return 1
     except Exception as e:
-       print(f"\tError: {e}\n")
+       print(f"\t[-] Error: {e}\n")
        return 0
 
 def cortexCheck(ip, api, id, fqdn):
@@ -150,7 +150,12 @@ def cortexMalwareScan(api, id, fqdn, ip):
     } }
     url=f"https://api-{fqdn}.xdr.us.paloaltonetworks.com/public_api/v1/endpoints/scan"
     response = requests.post(url, json=payload, headers=headers)
-    print(response.json())
+    if response.status_code == 200:
+        print(f"\t[+] Malware scan started with action ID: {response.json()['reply']['action_id']}")
+    elif response.status_code == 500:
+        print(f"\t[!] Warning: Dont was possible to initiate a malware scan.")
+    else:
+        print(f"\t[-] Error: {response.json()['reply']['err_msg']} Code: {response.status_code}")
 
 def banner():
     print("""

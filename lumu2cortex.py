@@ -1,8 +1,7 @@
-import requests
-import os
-from dotenv import load_dotenv
-import argparse
 import pandas as pd
+import requests, os, argparse
+from datetime import datetime
+from dotenv import load_dotenv
 
 # Upload LUMU IOCs to Cortex XDR Blocklist
 # Version v0.7 by alan7s
@@ -20,7 +19,11 @@ def cortexCheck(api, id, fqdn, blocklist, comment):
     } }
     url=f"https://api-{fqdn}.xdr.us.paloaltonetworks.com/public_api/v1/hash_exceptions/blocklist"
     response = requests.post(url, json=payload, headers=headers)
-    print(response.json())
+    if response.status_code == 200:
+        print(f"IOCs uploaded to Cortex XDR.")
+        print(f"Success code: {response.status_code} -> {response.json()['reply']['err_extra']}")
+    else:
+        print(f"Error code: {response.status_code} -> {response.json()['reply']['err_extra']}")
 
 def cortexMalwareScan(api, id, fqdn, ip):
     headers = {
@@ -71,8 +74,9 @@ def getAllLumuINC(api): #not implemented yet
     return openinc
 
 def logHash(filename, hashes, description):
+    date = datetime.datetime.now()
     with open(filename, 'a') as outfile:
-        outfile.writelines('#'+description+'\n')
+        outfile.writelines(f"#{date.strftime("%B/%Y")} - {description}\n")
         outfile.writelines((str(i)+'\n' for i in hashes))
 
 def main():
@@ -114,8 +118,8 @@ def main():
         comment = "LUMU IOC "+ description
         print(comment)
         logHash('hashes.txt', related_files, description)
-        for i in range(len(listofblocklist)):      
-            cortexCheck(cortex_api, cortex_id, cortex_fqdn, listofblocklist[i], comment)
+        for blocklist in listofblocklist:      
+            cortexCheck(cortex_api, cortex_id, cortex_fqdn, blocklist, comment)
     if ipSCAN:
         cortexMalwareScan(cortex_api, cortex_id, cortex_fqdn, ipSCAN)
 
