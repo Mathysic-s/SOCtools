@@ -174,7 +174,7 @@ def banner():
       /  oooooooooooooooo  .o.  oooo /,
      / ==ooooooooooooooo==.o.  ooo= //
     /_==__==========__==_ooo__ooo=_/'
-    `-----------------------------'""")
+    `-----------------------------'\n""")
 
 def main():
     parser = argparse.ArgumentParser(description='Scan IP address using VirusTotal, Shodan and Cortex XDR.')
@@ -188,7 +188,14 @@ def main():
     args = parser.parse_args()
 
     banner()
-    
+    for i, arg_value in enumerate(vars(args).values()): # Check if any argument exists
+        if arg_value:
+            break
+        elif i == len(vars(args))-1:
+            parser.print_usage()
+            print("\n[-] No arguments provided. Please use -h for help.\n")
+            sys.exit(1)
+
     # Carregando as variáveis de ambiente do arquivo .env
     load_dotenv(override=True)
     #.env file content example:
