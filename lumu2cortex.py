@@ -19,9 +19,8 @@ def cortexCheck(api, id, fqdn, blocklist, comment):
     } }
     url=f"https://api-{fqdn}.xdr.us.paloaltonetworks.com/public_api/v1/hash_exceptions/blocklist"
     response = requests.post(url, json=payload, headers=headers)
-    if response.status_code == 200:
+    if response.status_code == 200 and response.json()['reply'] == True:
         print(f"IOCs uploaded to Cortex XDR.")
-        print(f"Success code: {response.status_code} -> {response.json()['reply']['err_extra']}")
     else:
         print(f"Error code: {response.status_code} -> {response.json()['reply']['err_extra']}")
 
@@ -74,7 +73,7 @@ def getAllLumuINC(api): #not implemented yet
     return openinc
 
 def logHash(filename, hashes, description):
-    date = datetime.datetime.now()
+    date = datetime.now()
     with open(filename, 'a') as outfile:
         outfile.writelines(f"#{date.strftime("%B/%Y")} - {description}\n")
         outfile.writelines((str(i)+'\n' for i in hashes))
