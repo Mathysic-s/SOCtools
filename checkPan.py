@@ -1,28 +1,32 @@
-from panos.panorama import Panorama
-from panos import base
+from panos.firewall import Firewall
+from panos.errors import *
 from dotenv import load_dotenv
-import os
+import xml.etree.ElementTree as ET
+import os, xmltodict
 
-load_dotenv(override=True)
-# Conectar ao Panorama
-pan_ip = os.getenv("pan_ip")
-pan_user = os.getenv("pan_user")
-pan_pass = os.getenv("pan_pass")
-pan_key = os.getenv("pan_key")
+class panLogCollect:
+    def __init__(self) -> None:
+        load_dotenv(override=True)
+        self.pan_ip = os.getenv("pan_ip")
+        self.pan_user = os.getenv("pan_user")
+        self.pan_pass = os.getenv("pan_pass")
+        self.pan_key = os.getenv("pan_key")
 
-panorama = Panorama(pan_ip, pan_user, pan_pass, api_key=pan_key)
-
-# Definir o tipo de log que você quer puxar (por exemplo, tráfego)
-log_type = 'traffic'
-
-source_ip = 'IP_AQUI'
-destination_ip = 'IP_AQUI'
-
-# Criar a consulta de filtro
-query = f'(addr.src eq {source_ip})'
-
-# Puxar logs com o filtro aplicado
-logs = panorama.op(f"<show><log><{log_type}><equal><query>{query}</query></equal></{log_type}></log></show>", xml=True)
-
-# Exibir logs
-print(logs)
+    def getWanIfnet(self, ip_fws):
+        if type(ip_fws) != list:
+            ip_fws = []
+            ip_fws.append(ip_fws)
+        for ip_fw in ip_fws:
+            try:
+                firewall = Firewall(ip_fw, self.pan_user, self.pan_pass)
+                logs = firewall.op('show interface "all"')
+                logs2str = ET.tostring(logs, encoding='utf8').decode('utf8')
+                logs2json = xmltodict.parse(logs2str)
+                if logs2json['response']['@status'] == 'success':
+                    for ifnet in logs2json['response']['result']['ifnet']['entry']:
+                        if ifnet['zone'] == "WAN":
+                            print(f"{ip_fw} - {ifnet['ip']}")
+                else:
+                    print(f"Erro ao obter resposta de {ip_fw}")
+            except PanURLError:
+                print(f"Não foi possível conectar ao {ip_fw}")
