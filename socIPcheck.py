@@ -76,9 +76,9 @@ def shodanFreeScan(target):
     print("\n[+] Shodan scan:\n")
     try:
         results = requests.get(f"https://internetdb.shodan.io/{target}").json()
-        print(f"\t. Domains: {', '.join(map(str, results['hostnames'])) if 'hostnames' in results else 'N/A'}")
-        print(f"\t. Ports: {', '.join(map(str,results['ports'])) if 'ports' in results else 'N/A'}")
-        print(f"\t. Vulnerabilities: {', '.join(map(str, results['vulns'])) if 'vulns' in results else 'N/A'}")
+        print(f"\t. Domains: {', '.join(map(str, results['hostnames'])) if 'hostnames' in results and results['hostnames'] else 'N/A'}")
+        print(f"\t. Ports: {', '.join(map(str,results['ports'])) if 'ports' in results and results['ports'] else 'N/A'}")
+        print(f"\t. Vulnerabilities: {', '.join(map(str, results['vulns'])) if 'vulns' in results and results['vulns'] else 'N/A'}")
         print(f'\t. Source https://www.shodan.io/host/{target}\n')
         return 1
     except Exception as e:
@@ -257,7 +257,8 @@ def main():
             if re.match(ip_pattern, data):
                 vtScan(data, True, virustotal_api)
                 abuseIPDB(data, abuseipdb_api)
-                shodanScan(data, shodan_api)
+                if not shodanScan(data, shodan_api):
+                    shodanFreeScan(data)
             else:
                 vtScan(data,False,virustotal_api)
             time.sleep(15) #api limit 4 request per minute

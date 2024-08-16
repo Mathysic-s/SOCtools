@@ -15,8 +15,8 @@ panorama = Panorama(pan_ip, pan_user, pan_pass, api_key=pan_key)
 # Definir o tipo de log que você quer puxar (por exemplo, tráfego)
 log_type = 'traffic'
 
-source_ip = '***REMOVED***'
-destination_ip = '***REMOVED***'
+source_ip = 'IP_AQUI'
+destination_ip = 'IP_AQUI'
 
 # Criar a consulta de filtro
 query = f'(addr.src eq {source_ip})'
@@ -26,5 +26,3 @@ logs = panorama.op(f"<show><log><{log_type}><equal><query>{query}</query></equal
 
 # Exibir logs
 print(logs)
-
-# show log traffic query equal "(addr.src eq '***REMOVED***') and (addr.dst eq '***REMOVED***')"
