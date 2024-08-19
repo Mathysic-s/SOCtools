@@ -14,18 +14,18 @@ class panLogCollect:
 
     def getWanIfnet(self, ip_fws):
         if type(ip_fws) != list:
-            ip_fws = []
-            ip_fws.append(ip_fws)
+            self.ip_fws.append(ip_fws)
         for ip_fw in ip_fws:
             try:
-                firewall = Firewall(ip_fw, self.pan_user, self.pan_pass)
+                firewall = Firewall(ip_fw, self.pan_user, self.pan_pass, self.pan_key)
                 logs = firewall.op('show interface "all"')
                 logs2str = ET.tostring(logs, encoding='utf8').decode('utf8')
                 logs2json = xmltodict.parse(logs2str)
                 if logs2json['response']['@status'] == 'success':
-                    for ifnet in logs2json['response']['result']['ifnet']['entry']:
+                    print(f"[+] Out interfaces for {ip_fw}")
+                    for ifnetnum,ifnet in enumerate(logs2json['response']['result']['ifnet']['entry']):
                         if ifnet['zone'] == "WAN":
-                            print(f"{ip_fw} - {ifnet['ip']}")
+                            print(f"\t{ifnetnum} - {ifnet['ip']}")
                 else:
                     print(f"Erro ao obter resposta de {ip_fw}")
             except PanURLError:

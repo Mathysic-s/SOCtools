@@ -4,3 +4,4 @@ python-dotenv==1.0.1
 shodan==1.30.0
 pan-os-python==1.12.1
 setuptools==72.2.0
+xmltodict==0.13.0
